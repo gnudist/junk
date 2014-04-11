@@ -1,0 +1,97 @@
+#!/usr/bin/perl
+
+use strict;
+
+use Carp::Assert 'assert';
+use String::ShellQuote ( 'shell_quote' );
+
+use constant { term_emu_program => '/usr/bin/rxvt',
+	       term_font => '-xos4-terminus-medium-r-normal-*-*-240-*-*-c-*-koi8-r' };
+
+&main();
+
+
+################################################################################
+
+sub main
+{
+	my ( $bgcol, $fgcol ) = &get_term_colors();
+
+	&run_terminal( $bgcol, $fgcol );
+}
+
+sub get_term_colors
+{
+
+	my ( $bgcol, $fgcol, $safety ) = ( undef, undef, 0 );
+
+mZPwhe7DuSEW4vhC:
+	while( 1 )
+	{
+		$fgcol = &get_rand_color();
+		$bgcol = &get_rand_color(); 
+		
+		if( &contrast_is_ok( $bgcol, $fgcol ) )
+		{
+			last mZPwhe7DuSEW4vhC;
+		}
+		
+		assert( $safety < 100 );
+		$safety ++;
+	}
+
+	return ( $bgcol, $fgcol );
+}
+
+sub run_terminal
+{
+	my ( $bgcol, $fgcol ) = @_;
+	
+	$fgcol = &ht( $fgcol );
+	$bgcol = &ht( $bgcol );
+
+	my $cmd = sprintf( '%s -bg %s -fg %s -fn %s %s',
+			   shell_quote( &term_emu_program() ),
+			   shell_quote( $bgcol ),
+			   shell_quote( $fgcol ),
+			   shell_quote( &term_font() ),
+			   join( " ", map { scalar shell_quote( $_ ) } @ARGV ) );
+
+	exec( $cmd );
+}
+
+sub contrast_is_ok
+{
+	my ( $c1, $c2 ) = @_;
+
+	my $rv = 0;
+	
+	my $d1 = abs( $c1 -> [ 0 ] - $c2 -> [ 0 ] );
+	my $d2 = abs( $c1 -> [ 1 ] - $c2 -> [ 1 ] );
+	my $d3 = abs( $c1 -> [ 2 ] - $c2 -> [ 2 ] );
+
+	my $diff_idx = ( $d1 + $d2 + $d3 ) / 3;
+
+	if( $diff_idx > 150 )
+	{
+		$rv = 1;
+	}
+
+	return $rv;
+}
+
+sub ht
+{
+	my $c3 = shift;
+
+	return sprintf( '#%02x%02x%02x', @{ $c3 } );
+}
+
+sub get_rand_color
+{
+	my @t = ( int( rand( 256 ) ),
+		  int( rand( 256 ) ),
+		  int( rand( 256 ) ) );
+
+	return \@t;
+}
