@@ -20,6 +20,48 @@ sub main
 	&run_terminal( $bgcol, $fgcol );
 }
 
+sub get_rand_bg_color
+{
+
+	my $rv = undef;
+	my $safety = 0;
+
+oZM6O09TZRi0weQH:
+	while( 1 )
+	{
+		$rv = &get_rand_color();
+		if( &bg_color_ok( $rv ) )
+		{
+			last oZM6O09TZRi0weQH;
+		}
+		$safety ++;
+		assert( $safety < 100 );
+	}
+
+	return $rv;
+}
+
+sub bg_color_ok
+{
+	my $c3 = shift;
+
+	my $avg = ( $c3 -> [ 0 ] + $c3 -> [ 1 ] + $c3 -> [ 2 ] ) / 3;
+
+	my $rv = 1;
+	my $thresh = 50;
+
+	if( ( abs( $c3 -> [ 0 ] - $avg ) > $thresh )
+	    or
+	    ( abs( $c3 -> [ 1 ] - $avg ) > $thresh )
+	    or
+	    ( abs( $c3 -> [ 2 ] - $avg ) > $thresh ) )
+	{
+		$rv = 0;
+	}
+	    
+	return $rv;
+}
+
 sub get_term_colors
 {
 
@@ -29,7 +71,7 @@ mZPwhe7DuSEW4vhC:
 	while( 1 )
 	{
 		$fgcol = &get_rand_color();
-		$bgcol = &get_rand_color(); 
+		$bgcol = &get_rand_bg_color(); 
 		
 		if( &contrast_is_ok( $bgcol, $fgcol ) )
 		{
