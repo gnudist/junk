@@ -6,7 +6,7 @@ use Carp::Assert 'assert';
 use String::ShellQuote ( 'shell_quote' );
 
 use constant { term_emu_program => '/usr/bin/rxvt',
-	       term_font => '-xos4-terminus-medium-r-normal-*-*-240-*-*-c-*-koi8-r' };
+	       term_font => 'terminus-koi8-r-32' }; #-xos4-terminus-medium-r-normal-*-*-240-*-*-c-*-koi8-r' };
 
 &main();
 
@@ -78,7 +78,7 @@ mZPwhe7DuSEW4vhC:
 			last mZPwhe7DuSEW4vhC;
 		}
 		
-		assert( $safety < 100 );
+		assert( $safety < 1000 );
 		$safety ++;
 	}
 
@@ -108,15 +108,30 @@ sub contrast_is_ok
 
 	my $rv = 0;
 	
-	my $d1 = abs( $c1 -> [ 0 ] - $c2 -> [ 0 ] );
-	my $d2 = abs( $c1 -> [ 1 ] - $c2 -> [ 1 ] );
-	my $d3 = abs( $c1 -> [ 2 ] - $c2 -> [ 2 ] );
+	my $d1 = $c1 -> [ 0 ] - $c2 -> [ 0 ];
+	my $d2 = $c1 -> [ 1 ] - $c2 -> [ 1 ];
+	my $d3 = $c1 -> [ 2 ] - $c2 -> [ 2 ];
 
-	my $diff_idx = ( $d1 + $d2 + $d3 ) / 3;
-
-	if( $diff_idx > 150 )
+	if( ( ( $d1 > 0 )
+	      and
+	      ( $d2 > 0 )
+	      and
+	      ( $d3 > 0 ) )
+	    or
+	    ( ( $d1 < 0 )
+	      and
+	      ( $d2 < 0 )
+	      and
+	      ( $d3 < 0 ) ) )
 	{
-		$rv = 1;
+		if( ( $d1 > 100 )
+		    and
+		    ( $d2 > 100 )
+		    and
+		    ( $d3 > 100 ) )
+		{
+			$rv = 1;
+		}
 	}
 
 	return $rv;
